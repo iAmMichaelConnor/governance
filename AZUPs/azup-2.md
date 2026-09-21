@@ -84,7 +84,7 @@ Inherited, not deployed by this upgrade: `Registry` `0x35b22e09ee0390539439e24f0
 | Protocol contracts hash           | `0x2c075866eafc88a1f6f9addc7e337c6e64e45d1cb7fd7c0d612ebcec72aab2ca`                                                                                                                |
 | Contract address domain separator | `DOM_SEP__CONTRACT_ADDRESS_V2 = 4099338721` (= `hash_to_u32("az_dom_sep", "contract_address_v2")`), up from v4's `DOM_SEP__CONTRACT_ADDRESS_V1 = 1788365517`. Every protocol version uses a fresh separator so that the same contract address cannot exist on two rollup instances. |
 | Protocol contract set ([AZIP-12](../AZIPs/azip-12.md)) | `ContractClassRegistry` = `0x…01`, `ContractInstanceRegistry` = `0x…02`, `FeeJuice` = `0x…03`                                                                            |
-| Default public-setup allowlist    | `AuthRegistry._set_authorized`, `AuthRegistry.set_authorized` and `FeeJuice._increase_public_balance` (node default, `allowed_public_setup.ts`). `AuthRegistry` is a standard contract, not part of the protocol; two instances exist on mainnet L2 — `0x00b6c13d47a52717bc54afe32169319be75fa5874cf6da3ba5691b0d5800e2fb` (pinned by release `5.0.0`) and `0x1e8e7e73c592a1b1c9199b4b655ddc7a16fa8a8488df595610b71d3dc1cc666c` (pinned by `5.0.1` onward, and what current nodes reference). See open question 1. |
+| Default public-setup allowlist    | `AuthRegistry._set_authorized`, `AuthRegistry.set_authorized` and `FeeJuice._increase_public_balance` (node default, `allowed_public_setup.ts`). `AuthRegistry` is a standard contract, not part of the protocol. The canonical instance is `0x1e8e7e73c592a1b1c9199b4b655ddc7a16fa8a8488df595610b71d3dc1cc666c` (pinned by release `5.0.1` onward, and what nodes reference). An earlier instance, `0x00b6c13d47a52717bc54afe32169319be75fa5874cf6da3ba5691b0d5800e2fb` (pinned by release `5.0.0`), also exists on mainnet L2 and is superseded. |
 | Sequencer reward share            | 7000 bps of a 500-token checkpoint reward (`getRewardConfig()`)                                                                                                                    |
 
 ### 2. Sequencer Configuration (for signaling)
@@ -135,8 +135,7 @@ Sepolia has no flush rewarder, so the payload's sixth action is omitted there.
 
 ## Open Questions and Feedback
 
-1. **Two `AuthRegistry` instances exist on mainnet L2.** Release `5.0.0` pinned the standard `AuthRegistry` at `0x00b6c13d47a52717bc54afe32169319be75fa5874cf6da3ba5691b0d5800e2fb`; releases `5.0.1` onward pin it at `0x1e8e7e73c592a1b1c9199b4b655ddc7a16fa8a8488df595610b71d3dc1cc666c`. A mainnet node (`5.2.0`) reports both as deployed instances with different class ids; the `5.0.0-rc.2` address (`0x00d6f5…`) is not deployed. The default public-setup allowlist follows whichever release a node runs. This AZUP should state which instance is canonical for v5.
-2. This AZUP was filed after execution. The process requires the payload to be merged and tagged here *before* deployment; no tag was created for AZUP-2 (this repository has no tags). Proposal ids 0–2 on mainnet Governance also predate the AZUP process and have no AZUP.
+1. This AZUP was filed after execution. The process requires the payload to be merged and tagged here *before* deployment; no tag was created for AZUP-2 (this repository has no tags). Proposal ids 0–2 on mainnet Governance also predate the AZUP process and have no AZUP.
 
 ## Copyright Waiver
 
