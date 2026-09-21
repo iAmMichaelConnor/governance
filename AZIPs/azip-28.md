@@ -1,12 +1,11 @@
-# AZIP-28: Protocol Nullifier as a Transaction Nonce Commitment
+# AZIP-28: Protocol Nullifier Refinement
 
 ## Preamble
 
 | `azip` | `title` | `description` | `author` | `discussions-to` | `status` | `category` | `created` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 28 | Protocol Nullifier as a Transaction Nonce Commitment | Derives the protocol nullifier from the tx request's origin, chain id, version and salt only, so a fee bump or cancellation shares it. | Mike Connor (@iAmMichaelConnor) | N/A | Draft | Core | 2026-09-21 |
+| 28 | Protocol Nullifier Refinement | Derives the protocol nullifier from the tx request's origin, chain id, version and salt only, so a fee bump or cancellation shares it. | Mike Connor (@iAmMichaelConnor) | N/A | Draft | Core | 2026-09-21 |
 
-> This AZIP is retrospective. It records a change to the protocol nullifier's definition that was implemented ahead of the v6 release (see [Reference Implementation](#reference-implementation)). The specification below is the canonical statement of that change.
 
 ## Abstract
 
@@ -18,9 +17,9 @@ Nothing that exists today stops working. Every current Aztec.js, Aztec.nr, PXE a
 
 ## Impacted Stakeholders
 
-**Wallets.** The `salt` field of the tx request acquires a defined meaning: it is the transaction's nonce. Wallets already draw it uniformly at random per transaction, and nothing changes for a wallet that keeps doing so. A wallet MAY deliberately reuse the salt of a pending transaction to build a replacement (higher fee, or a no-op cancellation) that excludes the original. No change is required to ship this AZIP.
+**Wallets.** The `salt` field of the tx request can be interpreted as the transaction's nonce. Wallets already draw it uniformly at random per transaction, and nothing changes for a wallet that keeps doing so. A wallet MAY deliberately reuse the salt of a pending transaction to build a replacement (higher fee, or a no-op cancellation) that excludes the original. No change is required to ship this AZIP.
 
-**App developers and account contract authors.** Nothing changes in this AZIP for contracts. Every existing Aztec.nr pattern keeps working: the standard account entrypoint and its signed `AppPayload` with a `tx_nonce`, the `#[authorize_once]` style nullifiers, authorisation witnesses and their consumer-side nullifiers, fee-payment contracts, and the multi-call entrypoint. None of these reads the protocol nullifier, and none is invalidated by its new derivation. The change is the protocol-level foundation for account contracts and authorisation witnesses to bind signed intents to the transaction they authorise; adopting that is optional framework work that can land separately and incrementally.
+**App developers and account contract authors.** Nothing changes in this AZIP for contracts. Every existing Aztec.nr pattern keeps working: the standard account entrypoint and its signed `AppPayload` with a `tx_nonce`, the `#[authorize_once]` style nullifiers, authorisation witnesses and their consumer-side nullifiers, fee-payment contracts, and the multi-call entrypoint. None of these reads the protocol nullifier, and none is invalidated by its new derivation. The change is the protocol-level foundation for account contracts and authwits to optionally bind signed intents to the transaction they authorise; adopting that is optional framework work that can land separately and incrementally.
 
 **aztec-kit and other client libraries.** Request building, signing, fee handling and simulation continue unchanged. Libraries that add their own replay or cancellation machinery keep it and can retire it at their own pace once they choose to rely on the protocol nullifier instead.
 
