@@ -28,7 +28,7 @@ See the individual AZIPs and the forum announcement linked above. Several of the
 | **Governance proposal**                  | On-chain proposal id **4** (0-indexed `proposalId`; unrelated to AZUP numbering) on `Governance` `0x1102471eb3378fee427121c9efcea452e4b6b75e`, whose stored payload is the `GSEPayload` wrapper `0x1744be5cf3f314bfb2999db8acec1748916e74b5` created by `GovernanceProposer.submitRoundWinner` around the address above |
 | **Repository**                           | `AztecProtocol/aztec-packages`                                                                                                                                                       |
 | **Contract / Module**                    | `l1-contracts/src/periphery/V5UpgradePayload.sol` (deploy script: `l1-contracts/script/deploy/DeployRollupForUpgradeV5.s.sol`)                                                       |
-| **Source pin**                           | Tag `v5.0.0-rc.2`. Every source file in the Sourcify verification of the payload (67 files), the rollup (80 files) and the verifier is byte-identical to that tag; the same files are unchanged at `v5.0.0`, `v5.0.1` and the head of the `v5` branch. A copy of the payload source is in [`assets/azup-2/V5UpgradePayload.sol`](../assets/azup-2/V5UpgradePayload.sol). |
+| **Source pin**                           | Tag `v5.0.0-rc.2`. Every source file in the Sourcify verification of the payload (67 files), the rollup (80 files) and the verifier is byte-identical to that tag; the same files are unchanged at `v5.0.0`, `v5.0.1` and the head of the `v5` branch. Copies of the payload source and of the deploy script that holds the rollup configuration table are in [`assets/azup-2/V5UpgradePayload.sol`](../assets/azup-2/V5UpgradePayload.sol) and [`assets/azup-2/DeployRollupForUpgradeV5.s.sol`](../assets/azup-2/DeployRollupForUpgradeV5.s.sol). |
 | **Explorer**                             | [Payload on Etherscan](https://etherscan.io/address/0x1bBde48410bF7Ad05208cD77dE2bFb0e8F8803D8#code) · [Sourcify (exact match)](https://repo.sourcify.dev/1/0x1bBde48410bF7Ad05208cD77dE2bFb0e8F8803D8) |
 
 #### Actions
@@ -82,10 +82,40 @@ Inherited, not deployed by this upgrade: `Registry` `0x35b22e09ee0390539439e24f0
 | Rollup version                    | `4248422647`                                                                                                                                                                        |
 | VK tree root                      | `0x2b3b6ea4412b9c8f6457a37f91a2870306f8641e07e16a49b68bda6f8bc02892`                                                                                                                |
 | Protocol contracts hash           | `0x2c075866eafc88a1f6f9addc7e337c6e64e45d1cb7fd7c0d612ebcec72aab2ca`                                                                                                                |
+| Genesis archive root              | `0x177a4955b31ecaafad999753938a44e526b54c5ba5d536688227f85f15cfbdf5` (`archiveAt(0)`; identical on Sepolia)                                                                          |
 | Contract address domain separator | `DOM_SEP__CONTRACT_ADDRESS_V2 = 4099338721` (= `hash_to_u32("az_dom_sep", "contract_address_v2")`), up from v4's `DOM_SEP__CONTRACT_ADDRESS_V1 = 1788365517`. Every protocol version uses a fresh separator so that the same contract address cannot exist on two rollup instances. |
 | Protocol contract set ([AZIP-12](../AZIPs/azip-12.md)) | `ContractClassRegistry` = `0x…01`, `ContractInstanceRegistry` = `0x…02`, `FeeJuice` = `0x…03`                                                                            |
 | Default public-setup allowlist    | `AuthRegistry._set_authorized`, `AuthRegistry.set_authorized` and `FeeJuice._increase_public_balance` (node default, `allowed_public_setup.ts`). `AuthRegistry` is a standard contract, not part of the protocol. The canonical instance is `0x1e8e7e73c592a1b1c9199b4b655ddc7a16fa8a8488df595610b71d3dc1cc666c` (pinned by release `5.0.1` onward, and what nodes reference). An earlier instance, `0x00b6c13d47a52717bc54afe32169319be75fa5874cf6da3ba5691b0d5800e2fb` (pinned by release `5.0.0`), also exists on mainnet L2 and is superseded. |
 | Sequencer reward share            | 7000 bps of a 500-token checkpoint reward (`getRewardConfig()`)                                                                                                                    |
+
+#### Rollup configuration
+
+The rollup, escape hatch and slasher parameters below were read from the deployed mainnet contracts on 2026-09-21 and compared with the expected-configuration table in `DeployRollupForUpgradeV5.s.sol` at tag `v5.0.0-rc.2` (the check the script's own `validate()` performs at deploy time). Every value matches. The entry-queue configuration was decoded from the rollup's packed staking storage slot. Sepolia was checked the same way against the script's Sepolia overrides (listed where they differ) and also matches.
+
+| Parameter                          | Mainnet                              | Sepolia (where different) |
+| ---------------------------------- | ------------------------------------ | ------------------------- |
+| Slot duration / epoch duration     | 72 s / 32 slots                      |                           |
+| Target committee size              | 48                                   |                           |
+| Lag in epochs: validator set / RANDAO | 2 / 1                             |                           |
+| Inbox lag                          | 2 (AZIP-6)                           |                           |
+| Proof submission epochs            | 1                                    |                           |
+| Activation / ejection threshold (GSE) | 200,000 / 100,000 tokens          |                           |
+| Local ejection threshold           | 190,000 tokens                       | 199,000 tokens            |
+| Exit delay                         | 345,600 s (4 days)                   | 172,800 s (2 days)        |
+| Mana target                        | 75,000,000                           |                           |
+| Proving cost per mana              | 12,500,000 (AZIP-16)                 |                           |
+| Initial ETH per fee asset (E12)    | 9,512,195 at deploy; oracle-updated since (5,858,348 on 2026-09-21) |             |
+| Entry queue: bootstrap set size / bootstrap flush / normal flush min / quotient / max flush | 500 / 4 / 1 / 400 / 4 |    |
+| Sequencer share / checkpoint reward | 7000 bps / 500 tokens               |                           |
+| Reward boost (increment, maxScore, a, minimum, k) | 101,400 / 367,500 / 250,000 / 10,000 / 1,000,000 (AZIP-5) |  |
+| Slashing: round size / quorum      | 4 epochs (128 slots) / 65            |                           |
+| Slashing: lifetime / execution delay / offset (rounds) | 34 / 28 / 2      | 5 / 2 / 2                 |
+| Slashing: disable duration         | 259,200 s (3 days)                   | 432,000 s (5 days)        |
+| Slashing vetoer                    | `0xBbB4aF368d02827945748b28CD4b2D42e4A37480` | `0xdfe19Da6a717b7088621d8bBB66be59F2d78e924` |
+| Slash amounts small / medium / large | 2,000 / 5,000 / 5,000 tokens (AZIP-16) | 100,000 / 250,000 / 250,000 tokens |
+| Escape hatch: bond / withdrawal tax / failed-hatch punishment | 332,000,000 / 1,660,000 / 9,600,000 tokens |  |
+| Escape hatch: frequency / active duration / lag in hatches | 112 epochs / 2 epochs / 1 |               |
+| Escape hatch: proposing exit delay | 30 days                              |                           |
 
 ### 2. Sequencer Configuration (for signaling)
 
