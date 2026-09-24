@@ -1,10 +1,10 @@
-# AZIP-28: Protocol Nullifier Refinement
+# AZIP-29: Protocol Nullifier Refinement
 
 ## Preamble
 
 | `azip` | `title` | `description` | `author` | `discussions-to` | `status` | `category` | `created` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 28 | Protocol Nullifier Refinement | Derives the protocol nullifier from the tx request's origin, chain id, version and salt only, so a fee bump or cancellation shares it. | Mike Connor (@iAmMichaelConnor) | N/A | Draft | Core | 2026-09-21 |
+| 29 | Protocol Nullifier Refinement | Derives the protocol nullifier from the tx request's origin, chain id, version and salt only, so a fee bump or cancellation shares it. | Mike Connor (@iAmMichaelConnor) | N/A | Draft | Core | 2026-09-21 |
 
 
 ## Abstract
